@@ -19,8 +19,10 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
 #Other Variables for use in the program
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
+# SCREEN_WIDTH = 400
+# SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 288
+SCREEN_HEIGHT = 512
 SPEED = 20
 SCORE = 0
 
@@ -29,10 +31,11 @@ font = pygame.font.SysFont("Verdana", 60)
 font_small = pygame.font.SysFont("Verdana", 20)
 game_over = font.render("Game Over", True, BLACK)
 
-background = pygame.image.load("AnimatedStreet.png")
+background = pygame.image.load("AnimatedStreet2.png")
 
 #Create a white screen 
-DISPLAYSURF = pygame.display.set_mode((400,600))
+# DISPLAYSURF = pygame.display.set_mode((400,600))
+DISPLAYSURF = pygame.display.set_mode((288,512))
 DISPLAYSURF.fill(WHITE)
 pygame.display.set_caption('HighWay Simulation')
 
@@ -43,20 +46,20 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load("Player.png")
         self.surf = pygame.Surface((40, 75))
-        self.rect = self.surf.get_rect(center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        self.rect = self.surf.get_rect(center = (SCREEN_WIDTH/2, SCREEN_HEIGHT-175))
 
     def up(self):
-        if not self.rect.y <= 0:
-            self.rect.move_ip(0, -5)
+        if not self.rect.y <= 0:    
+            self.rect.move_ip(0, -7)
     def down(self):
         if not self.rect.y >= 498:
-            self.rect.move_ip(0,5)
+            self.rect.move_ip(0,7)
     def left(self):
         if self.rect.left > 0:
-            self.rect.move_ip(-5, 0)
+            self.rect.move_ip(-7, 0)
     def right(self):
         if self.rect.right < SCREEN_WIDTH:
-            self.rect.move_ip(5, 0)
+            self.rect.move_ip(7, 0)
 
     def getRect(self):
         return self.rect
@@ -162,7 +165,7 @@ class GameState:
         # Cycles through all events occuring
         for event in pygame.event.get():
             if event.type == INC_SPEED:
-                  if SPEED <= 35:
+                  if SPEED <= 20:
                       SPEED += 0.5
                   else:
                       continue
@@ -189,11 +192,13 @@ class GameState:
             enemies.add(E2)
             all_sprites.add(E2)
 
-        # To be run if collision occurs between Player and Enemy
-        if pygame.sprite.spritecollideany(P1, enemies):
+        # To be ran if collision occurs between Player and Enemy
+        # or  if the agent drives on the pedestrian lane
+        if (pygame.sprite.spritecollideany(P1, enemies)):
+        # or  (P1.rect.x > 315 or P1.rect.x <= 39):
             reward = -1
             terminal = True
-
+        
             pygame.display.update()
             for entity in all_sprites:
                 entity.kill()
@@ -207,7 +212,7 @@ class GameState:
             all_sprites = pygame.sprite.Group()
             all_sprites.add(P1)
             all_sprites.add(E1)
-            SPEED = 20
+            SPEED = 10
             SCORE = 0
 
         image_data = pygame.surfarray.array3d(pygame.display.get_surface())
