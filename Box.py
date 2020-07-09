@@ -85,13 +85,15 @@ class Enemy(pygame.sprite.Sprite):
         if (self.rect.bottom > 600):
             SCORE += 1  #Agent gets a reward
             self.rect.top = 0
-            if time.time() % 2 == 0:
-                self.rect = self.surf.get_rect(center=(__.randint(40, SCREEN_WIDTH - 40), 0))
-            else:
-                self.rect.center = (P1.getRect().x, 0)
-            return 1
-        else:
-            return 0.1
+            self.rect.center = (__.randint(40, SCREEN_WIDTH - 40), 0)
+
+            # if time.time() % 2 == 0:
+                # self.rect = self.surf.get_rect(center=(__.randint(40, SCREEN_WIDTH - 40), 0))
+            # else:
+                # self.rect.center = (P1.getRect().x, 0)
+            # return 1
+        # else:
+            # return 0.1
 
 
 
@@ -111,7 +113,7 @@ all_sprites.add(E1)
 #Adding a new User event
 INC_SPEED = pygame.USEREVENT + 1
 pygame.time.set_timer(INC_SPEED, 1000)
-
+scorelist = []
 class GameState:
     global P1
     def __init__(self):
@@ -227,6 +229,10 @@ class GameState:
             all_sprites.add(P1)
             all_sprites.add(E1)
             SPEED = 10
+            scorelist.append(SCORE)
+            if len(scorelist) > 20:
+                priny(scorelist)
+                sys.exit(0)
             SCORE = 0
 
         image_data = pygame.surfarray.array3d(pygame.display.get_surface())
