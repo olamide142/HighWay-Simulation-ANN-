@@ -1,14 +1,14 @@
 import sys
-import random
 from itertools import cycle
+import random as __
 import pygame
-
+import time
 
 #Initialzing 
 pygame.init()
 
 #Setting up FPS 
-FPS = 60
+FPS = 30
 FramePerSec = pygame.time.Clock()
 
 #Creating colors
@@ -52,14 +52,14 @@ class Player(pygame.sprite.Sprite):
         if not self.rect.y <= 0:    
             self.rect.move_ip(0, -7)
     def down(self):
-        if not self.rect.y >= 498:
+        if not self.rect.y >= 410:
             self.rect.move_ip(0,7)
     def left(self):
         if self.rect.left > 0:
-            self.rect.move_ip(-7, 0)
+            self.rect.move_ip(-10, 0)
     def right(self):
         if self.rect.right < SCREEN_WIDTH:
-            self.rect.move_ip(7, 0)
+            self.rect.move_ip(10, 0)
 
     def getRect(self):
         return self.rect
@@ -69,28 +69,33 @@ class Player(pygame.sprite.Sprite):
 
 P1 = Player()
 
-
 class Enemy(pygame.sprite.Sprite):
+    global P1
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load("Enemy.png")
         self.surf = pygame.Surface((42, 70))
-        self.rect = self.surf.get_rect(center=(random.randint(40, SCREEN_WIDTH - 40), 0))
-        if SCORE % 3 == 1:
-            self.rect = P1.getRect()
-            self.surf = P1.getSurf()
+        self.rect = self.surf.get_rect(center=(P1.getRect().x, 0))
 
     def move(self):
+
         global SCORE
 
         self.rect.move_ip(0,SPEED)
         if (self.rect.bottom > 600):
             SCORE += 1  #Agent gets a reward
             self.rect.top = 0
-            self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
+            if time.time() % 2 == 0:
+                self.rect = self.surf.get_rect(center=(__.randint(40, SCREEN_WIDTH - 40), 0))
+            else:
+                self.rect.center = (P1.getRect().x, 0)
             return 1
         else:
             return 0.1
+
+
+
+        
 
 
 #Setting up Sprites
@@ -112,8 +117,9 @@ class GameState:
     def __init__(self):
         self.crash = False
         self.score = 0
-
+    test=False
     def frame_step(self, input_actions):
+
         reward = 0.1
         terminal = False
         global SCORE
@@ -124,7 +130,7 @@ class GameState:
         global enemies
 
         r = "tensor(1.)"
-
+        if GameState.test:r = None
         #DO_NOTHING
         if str(input_actions[0]) == r:
             pass
@@ -164,6 +170,7 @@ class GameState:
         self.score = SCORE
         # Cycles through all events occuring
         for event in pygame.event.get():
+
             if event.type == INC_SPEED:
                   if SPEED <= 20:
                       SPEED += 0.5
@@ -176,18 +183,24 @@ class GameState:
 
         DISPLAYSURF.blit(background, (0, 0))
         scores = font_small.render(str(SCORE), True, BLACK)
-        DISPLAYSURF.blit(scores, (10, 10))
+        # DISPLAYSURF.blit(scores, (10, 10))
 
         #Moves and Re-draws all Sprites
         for entity in all_sprites:
             DISPLAYSURF.blit(entity.image, entity.rect)
             if entity != P1:
-                if entity.move() == 1:
-                    reward = 1
+                if entity.move() == 1:reward = 1
+            _ = [E1.rect.x - 50 , E1.rect.x + 50]
+            if GameState.test:
+                if time.time()%2>=1.5 and (P1.rect.y>450):P1.up()
+                if (P1.rect.x>_[0]) and (P1.rect.x<_[1]):
+                    li = [P1.right,P1.left]
+                    P1.down(),__.choice(li)()
+
 
             # Add one more enemy
             # car half way
-        if E1.rect.y == (SCREEN_HEIGHT / 2) and (len(all_sprites) < 4):
+        if E1.rect.y == (SCREEN_HEIGHT / 2) and (len(all_sprites) >= 3):
             E2 = Enemy()
             enemies.add(E2)
             all_sprites.add(E2)
@@ -196,6 +209,7 @@ class GameState:
         # or  if the agent drives on the pedestrian lane
         if (pygame.sprite.spritecollideany(P1, enemies)):
         # or  (P1.rect.x > 315 or P1.rect.x <= 39):
+
             reward = -1
             terminal = True
         

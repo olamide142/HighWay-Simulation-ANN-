@@ -18,7 +18,7 @@ import uuid
 import csv
 
 thegreatlist = []
-outputFile = open('training3.csv', 'w+', newline='')
+outputFile = open('training.csv', 'w+', newline='')
 
 
 # with open(str(file_name+'.csv'), 'wt') as file:
@@ -35,7 +35,7 @@ class NeuralNetwork(nn.Module):
         self.gamma = 0.99
         self.final_epsilon = 0.0001
         self.initial_epsilon = 0.1
-        self.number_of_iterations = 2000000
+        self.number_of_iterations = 3000000
         self.replay_memory_size = 10000
         self.minibatch_size = 32
 
@@ -110,7 +110,7 @@ def train(model, start):
 
     # initialize epsilon value
     epsilon = model.initial_epsilon
-    iteration = 0
+    iteration = 1
 
     epsilon_decrements = np.linspace(model.initial_epsilon, model.final_epsilon, model.number_of_iterations)
 
@@ -234,6 +234,7 @@ def test(model):
     image_data = resize_and_bgr2gray(image_data)
     image_data = image_to_tensor(image_data)
     state = torch.cat((image_data, image_data, image_data, image_data)).unsqueeze(0)
+    GameState.test=True
 
     while True:
         # get output from the neural network
@@ -267,7 +268,7 @@ def main(mode):
 
     if mode == 'test':
         model = torch.load(
-            'pretrained_model/current_model_1625000.pth',
+            'pretrained_model/current_model_325000.pth',
             map_location='cpu' if not cuda_is_available else None
         ).eval()
 
@@ -280,7 +281,11 @@ def main(mode):
         if not os.path.exists('pretrained_model/'):
             os.mkdir('pretrained_model/')
 
-        model = NeuralNetwork()
+        # model = NeuralNetwork()
+        model = torch.load(
+            'pretrained_model/current_model_2000000.pth',
+            map_location='cpu' if not cuda_is_available else None
+        ).eval()
 
         if cuda_is_available:  # put on GPU if CUDA is available
             model = model.cuda()
